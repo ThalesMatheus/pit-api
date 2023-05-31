@@ -2,6 +2,8 @@ import { db } from "../db.js";
 import { hash, compare } from 'bcrypt'
 import { response } from "express";
 import jwt from 'jsonwebtoken';
+
+import { v5 as uuidv5, v4 as uuidv4 } from 'uuid';
 export const getUser = (req, res) => {
   const q = "SELECT * FROM usuarios where `email` = ? && `senha` = ?";
 
@@ -25,14 +27,26 @@ export const getUser = (req, res) => {
 
 export const addUser = (req, res) => {
   var peido = req.body.peido
+  const id = uuidv4()
+  console.log(id)
     hash(req.body.senha, 10, (err, hash) => {
       const q =
-        "INSERT INTO usuarios(`email`, `senha`) VALUES(?,?)";
-      db.query(q, [req.body.email, hash], (err) => {
+        "INSERT INTO usuarios(`uuid`, `email`, `senha`) VALUES(?,?,?)";
+      db.query(q, [id, req.body.email, hash], (err) => {
+        console.log(err)
         if (err) return res.status(200).json("Esse email já foi usado");
 
         return res.status(200).json("Usuário criado com sucesso.");
     })
+    })
+  }
+
+  export const auth_check = (req, res) => {
+    const q = "SELECT * FROM usuarios where `email` = ?"
+    db.query(q, [req.body.email], (err, response) => {
+      const uuid = response[0].uuid
+      console.log(uuid)
+      res.json(uuid)
     })
   }
   export const validaCookie = (req, res) => {
@@ -61,9 +75,11 @@ export const addUser = (req, res) => {
         
         compare(req.body.senha, data[0].senha, (error, response) => {
           if (response){
+          const x = data[0].uuid
+          console.log(x)
           var temptoken = process.env.SECRET
-          console.log(temptoken)
-          const token = jwt.sign({id: req.body.mail}, temptoken);
+          const token = jwt.sign({ id: x }, temptoken, { expiresIn: '1h'})
+
           const response = {
             message: "Certo",
             token: token
@@ -71,7 +87,7 @@ export const addUser = (req, res) => {
           }
           const a = res.status(200).json(response);
             return a
-          }
+        }
       
           else {
             const response = {
