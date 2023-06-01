@@ -2,10 +2,9 @@ import { db } from "../db.js";
 import { hash, compare } from 'bcrypt'
 import { response } from "express";
 import jwt from 'jsonwebtoken';
-
 import { v5 as uuidv5, v4 as uuidv4 } from 'uuid';
 export const getUser = (req, res) => {
-  const q = "SELECT * FROM usuarios where `email` = ? && `senha` = ?";
+  const q = "SELECT * FROM login where `email` = ? && `senha` = ?";
 
   const values = [
     req.body.email,
@@ -26,23 +25,35 @@ export const getUser = (req, res) => {
 };
 
 export const addUser = (req, res) => {
+  console.log(req.data)
   var peido = req.body.peido
   const id = uuidv4()
+  console.log(req.body.email)
   console.log(id)
-    hash(req.body.senha, 10, (err, hash) => {
-      const q =
-        "INSERT INTO usuarios(`uuid`, `email`, `senha`) VALUES(?,?,?)";
-      db.query(q, [id, req.body.email, hash], (err) => {
-        console.log(err)
-        if (err) return res.status(200).json("Esse email já foi usado");
-
-        return res.status(200).json("Usuário criado com sucesso.");
-    })
-    })
+  const x = "INSERT INTO user_data(`nome`, `sobrenome`,`endereco`, `telefone`, `apelido`) VALUES(?,?,?,?,?)"
+  db.query(x,[req.body.nome, req.body.sobrenome, req.body.endereco, req.body.telefone, req.body.nick], (error, response) => {
+    if (response) {
+      hash(req.body.senha, 10, (err, hash) => {
+        const q =
+          "INSERT INTO login(`uuid`, `email`, `senha`) VALUES(?,?,?)";
+        db.query(q, [id, req.body.email, hash], (err) => {
+          console.log(err)
+          if (err) return res.status(200).json("Esse email já foi usado");
+  
+          return res.status(200).json("Usuário criado com sucesso.");
+      })
+      })
+    }
+    else {
+      res.status(200).json(error)
+      console.log(error)
+    }
+  })
+    
   }
 
   export const auth_check = (req, res) => {
-    const q = "SELECT * FROM usuarios where `email` = ?"
+    const q = "SELECT * FROM login where `email` = ?"
     db.query(q, [req.body.email], (err, response) => {
       const uuid = response[0].uuid
       console.log(uuid)
@@ -62,7 +73,7 @@ export const addUser = (req, res) => {
   }
   export const autUser = (req, res) => {
     const q =
-      "SELECT * FROM usuarios where `email` = " + "\"" + req.body.email + "\"";
+      "SELECT * FROM login where `email` = " + "\"" + req.body.email + "\"";
     console.log(q)
     db.query(q, (err, data) => {
       //if (err) 
@@ -102,7 +113,7 @@ export const addUser = (req, res) => {
 
   export const updateUser = (req, res) => {
     const q =
-      "UPDATE usuarios SET `email` = ?, `senha` = ? WHERE `email` ";
+      "UPDATE login SET `email` = ?, `senha` = ? WHERE `email` ";
 
     const values = [
       req.body.email,
@@ -117,7 +128,7 @@ export const addUser = (req, res) => {
   };
 
   export const deleteUser = (req, res) => {
-    const q = "DELETE FROM usuarios WHERE `id` = ?";
+    const q = "DELETE FROM login WHERE `id` = ?";
 
     db.query(q, [req.params.id], (err) => {
       if (err) return res.json(err);
@@ -125,4 +136,29 @@ export const addUser = (req, res) => {
       return res.status(200).json("Usuário deletado com sucesso.");
     });
 
+  };
+  export const updateImage = (req, res) => {
+    if (req.files) {
+      console.log(req.body.uuid)
+      const file = req.files.photo;
+      const filename = `${Math.floor(Math.random() * 1000) + 1 }`; // Generate a unique filename
+      const uploadPath = './uploads/' + filename; // Specify the path to save the file
+  
+      file.mv(uploadPath, function(err) {
+        if (err) {
+          res.status(200).json("falha ao fazer upload! Tente novamente mais tarde");
+        } else {
+          res.status(200).json("Perfil atualizado");
+          var q = "UPDATE login SET pfp = ? WHERE uuid = ?"
+          db.query(q,[filename, req.body.uuid], (err) => {
+            if(err){
+              console.log(err)
+              return;
+            }
+          })
+        }
+      });
+    } else {
+      res.status(400).json({ error: 'No file uploaded' });
+    }
   };
