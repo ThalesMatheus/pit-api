@@ -20,5 +20,8 @@
     "nodemon": "^2.0.22",
     "uuid": "^9.0.0"
   },
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "standard": "^17.1.0"
+  }
 }
