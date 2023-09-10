@@ -23,5 +23,8 @@
     "standard": "^17.1.0",
     "uuid": "^9.0.0"
   },
-  "description": ""
+  "description": "",
+  "devDependencies": {
+    "standard": "^17.1.0"
+  }
 }
