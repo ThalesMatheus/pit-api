@@ -1,5 +1,5 @@
 import express from 'express'
-import { addUser, deleteUser, getUser, updateUser, autUser, validaCookie, auth_check, updateImage } from '../controllers/user.js'
+import { addUser, deleteUser, getUser, deleteGroup, updateUser, createGroup, autUser, validaCookie, auth_check, updateImage, getAllGroups } from '../controllers/user.js'
 
 const router = express.Router()
 
@@ -11,6 +11,10 @@ router.post('/login', autUser)
 router.post('/valida', validaCookie)
 router.post('/auth_check', auth_check)
 router.post('/update', updateImage)
+router.post('/creategroup', createGroup)
+router.post('/groups/delete', deleteGroup)
+
+router.get('/groups', getAllGroups)
 // router.post("/auth" authUser)
 
 router.put('/:id', updateUser)
