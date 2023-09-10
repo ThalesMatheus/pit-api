@@ -1,6 +1,6 @@
 import express from 'express'
-import { addUser, deleteUser, getUser, updateUser, deleteGroup, createGroup, autUser, validaCookie, auth_check, forgotPass, getAllGroups } from '../controllers/user.js'
-import { updateImage } from '../controllers/updateImage.js'
+import { addUser, deleteUser, getUser, updateUser, deleteGroup, createGroup, autUser, validaCookie, auth_check, forgotPass, getAllGroups,updateImage } from '../controllers/user.js'
+//import { updateImage } from '../controllers/updateImage.js'
 
 const router = express.Router()
 

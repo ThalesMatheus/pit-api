@@ -2312,7 +2312,6 @@ const stream = require('stream');
 const zlib = require('zlib');
 const events = require('events');
 
-
 const _interopDefaultLegacy = e => e && typeof e === 'object' && 'default' in e ? e : { default: e };
 
 function _interopNamespace(e) {

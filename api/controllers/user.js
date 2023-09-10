@@ -54,7 +54,8 @@ if (keysWithNullValues.length > 0) {
         res.status(200).json(response);
       } else {
         const crud = 'INSERT INTO grupo(`grupoId`,`nome`,`foto`,`descricao`, `cnpj`,`cep`,`categorias`,`visibilidade`) VALUES(?,?,?,?,?,?,?,?)';
-        db.query(crud, [req.body.grouplink ? req.body.grouplink : uuidv4, req.body.nome, req.body.image ? 'teste.png' : 'none', req.body.description, req.body.cnpj, req.body.endereco, 'esporte', 1], (error, result) => {
+        var privado_ = req.body.c77 == "on" ? 1 : 0;
+        db.query(crud, [req.body.grouplink ? req.body.grouplink : uuidv4, req.body.nome, req.body.image ? 'teste.png' : 'none', req.body.description, req.body.cnpj, req.body.endereco, 'esporte', privado_], (error, result) => {
           if (error) {
             console.error('Error creating group:', error);
             res.status(500).json({ error: 'Error creating group' });
@@ -72,7 +73,7 @@ if (keysWithNullValues.length > 0) {
   });
 }}
 export const getAllGroups = (req, res) => {
-  const crud = 'SELECT * FROM grupo';
+  const crud = 'SELECT * FROM grupo where visibilidade = 1';
   db.query(crud, (error, results) => {
     if (error) {
       console.error('Error fetching groups:', error);
