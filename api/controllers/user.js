@@ -3,6 +3,9 @@ import { hash, compare } from 'bcrypt'
 import { response } from 'express'
 import jwt from 'jsonwebtoken'
 import { v5 as uuidv5, v4 as uuidv4 } from 'uuid'
+import nodemailer from 'nodemailer'
+import md5 from 'blueimp-md5'
+
 export const getUser = (req, res) => {
   const q = 'SELECT * FROM login where `email` = ? && `senha` = ?'
 
@@ -12,7 +15,7 @@ export const getUser = (req, res) => {
     // if (err)
     // {return res.status(200).json(err.message)}
 
-    if (data === undefined) {
+    if (data == undefined) {
       return res.status(200).json(values[req.body.email] + 'Errado')
     } else {
       return res.status(200).json('Certo')
@@ -22,81 +25,6 @@ export const getUser = (req, res) => {
 function trigger (idtext, messagetext) {
   const response = { id: idtext, message: `${messagetext}` }
   res.status(200).json(response)
-}
-
-export const createGroup = (req, res) => {
-  const keysWithNullValues = Object.keys(req.body).filter(key => req.body[key] === '');
-  const keysString = keysWithNullValues.join(', ');
-  console.log(keysWithNullValues)
-if (keysWithNullValues.length > 0) {
-  console.log('im here')
-  const response = { id: 2, message: `há campos em branco. Preencha-os e tente novamente: ${keysString} ` };
-  res.status(200).json(response);
-} else {
-  if (req.files) {
-    const file = req.files.photo
-    const fileExtension = file.name.split('.').pop()
-    const uploadPath = './uploads/' + filename // Specify the path to save the file
-
-    file.mv(uploadPath)
-  }
-
-  const tmp = 'SELECT * FROM grupo WHERE `grupoId` = ?';
-  db.query(tmp, [req.body.grouplink], (error, result) => {
-    if (error) {
-      console.error('Error checking if group exists:', error);
-      res.status(500).json({ error: 'Error checking if group exists' });
-    } else {
-      if (result.length !== 0) {
-        const response = { id: 2, message: 'A group with this ID already exists!' };
-        res.status(200).json(response);
-      } else {
-        const crud = 'INSERT INTO grupo(`grupoId`,`nome`,`foto`,`descricao`, `cnpj`,`cep`,`categorias`,`visibilidade`) VALUES(?,?,?,?,?,?,?,?)';
-        db.query(crud, [req.body.grouplink ? req.body.grouplink : uuidv4, req.body.nome, req.body.image ? 'teste.png' : 'none', req.body.description, req.body.cnpj, req.body.endereco, 'esporte', 1], (error, result) => {
-          if (error) {
-            console.error('Error creating group:', error);
-            res.status(500).json({ error: 'Error creating group' });
-          } else {
-            const createdGroup = {
-              id: result.insertId,
-              name: req.body.nome,
-              // Add more properties as needed
-            };
-            res.status(201).json(createdGroup);
-          }
-        });
-      }
-    }
-  });
-}}
-export const getAllGroups = (req, res) => {
-  const crud = 'SELECT * FROM grupo';
-  db.query(crud, (error, results) => {
-    if (error) {
-      console.error('Error fetching groups:', error);
-      res.status(500).json({ error: 'Error fetching groups' });
-    } else {
-      console.log(results)
-      res.status(200).json(results);
-    }
-  });
-};
-export const deleteGroup = (req, res) => {
-  console.log(req.body)
-  const q = 'DELETE FROM grupo WHERE `grupoId` = ?'
-  db.query(q, [req.body.grupoId], (err, response) => {
-    if (err){
-      return res.status(200).json(err)
-    }
-    else {
-      const block = {
-        id: 1,
-        message: 'grupo deletado com sucesso'
-      }
-      return res.status(200).json(block)
-    }
-  })
-
 }
 export const addUser = (req, res) => {
   // console.log(req.data);
@@ -163,7 +91,7 @@ export const autUser = (req, res) => {
     // if (err)
     // {return res.status(200).json(err.message)}
     console.log(data)
-    if (data.length === 0) {
+    if (data.length == 0) {
       return res.status(200).json('Email não encontrado no sistema')
     } else {
       compare(req.body.senha, data[0].senha, (error, response) => {
@@ -203,7 +131,7 @@ export const updateUser = (req, res) => {
 }
 
 export const deleteUser = (req, res) => {
-  const q = 'DELETE FROM login WHERE `uuid` = ?'
+  const q = 'DELETE FROM login WHERE `id` = ?'
 
   db.query(q, [req.params.id], (err) => {
     if (err) return res.json(err)
@@ -237,4 +165,39 @@ export const updateImage = (req, res) => {
   } else {
     res.status(400).json({ error: 'No file uploaded' })
   }
+}
+
+export const forgotPass = (req, res) => {
+  var new_pass = md5(Date.now());
+
+  const transport = nodemailer.createTransport({
+    host: "smtp.gmail.com",
+    port: 465,
+    secure: true,
+    auth: {
+      user: "joao.ns.silvajp@gmail.com",
+      pass: process.env.NODEMAI,
+    },
+  });
+
+  transport
+    .sendMail({
+      from: "Joao-Pedro-PIT <joao.ns.silvajp@gmail.com>",
+      to: req.body.email,
+      subject: "Enviando email com Nodemailer",
+      html: `<h1>Olá, rei do capa!</hl> <p>Sua nova senha é: ${new_pass}</p>`,
+      text: `Olá, rei do capa! Sua nova senha é: ${new_pass}`,
+    })
+    .then(() => {
+      hash(new_pass, 10, (err, hash) => {
+      const q = 'UPDATE login SET senha = ? WHERE `email` = ?'
+
+      db.query(q, [hash,req.body.email], (err) => {
+        if (err) return res.json(err)
+    
+        return res.status(200).json('Caso exista um email registrado no sistema, cheque sua caixa de entrada')
+      })
+    })
+})
+    .catch(err => console.log("Erro ao enviar email: ", err));
 }
