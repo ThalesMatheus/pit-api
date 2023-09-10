@@ -26,6 +26,80 @@ function trigger (idtext, messagetext) {
   const response = { id: idtext, message: `${messagetext}` }
   res.status(200).json(response)
 }
+export const createGroup = (req, res) => {
+  const keysWithNullValues = Object.keys(req.body).filter(key => req.body[key] === '');
+  const keysString = keysWithNullValues.join(', ');
+  console.log(keysWithNullValues)
+if (keysWithNullValues.length > 0) {
+  console.log('im here')
+  const response = { id: 2, message: `há campos em branco. Preencha-os e tente novamente: ${keysString} ` };
+  res.status(200).json(response);
+} else {
+  if (req.files) {
+    const file = req.files.photo
+    const fileExtension = file.name.split('.').pop()
+    const uploadPath = './uploads/' + filename // Specify the path to save the file
+
+    file.mv(uploadPath)
+  }
+
+  const tmp = 'SELECT * FROM grupo WHERE `grupoId` = ?';
+  db.query(tmp, [req.body.grouplink], (error, result) => {
+    if (error) {
+      console.error('Error checking if group exists:', error);
+      res.status(500).json({ error: 'Error checking if group exists' });
+    } else {
+      if (result.length !== 0) {
+        const response = { id: 2, message: 'A group with this ID already exists!' };
+        res.status(200).json(response);
+      } else {
+        const crud = 'INSERT INTO grupo(`grupoId`,`nome`,`foto`,`descricao`, `cnpj`,`cep`,`categorias`,`visibilidade`) VALUES(?,?,?,?,?,?,?,?)';
+        db.query(crud, [req.body.grouplink ? req.body.grouplink : uuidv4, req.body.nome, req.body.image ? 'teste.png' : 'none', req.body.description, req.body.cnpj, req.body.endereco, 'esporte', 1], (error, result) => {
+          if (error) {
+            console.error('Error creating group:', error);
+            res.status(500).json({ error: 'Error creating group' });
+          } else {
+            const createdGroup = {
+              id: result.insertId,
+              name: req.body.nome,
+              // Add more properties as needed
+            };
+            res.status(201).json(createdGroup);
+          }
+        });
+      }
+    }
+  });
+}}
+export const getAllGroups = (req, res) => {
+  const crud = 'SELECT * FROM grupo';
+  db.query(crud, (error, results) => {
+    if (error) {
+      console.error('Error fetching groups:', error);
+      res.status(500).json({ error: 'Error fetching groups' });
+    } else {
+      console.log(results)
+      res.status(200).json(results);
+    }
+  });
+};
+export const deleteGroup = (req, res) => {
+  console.log(req.body)
+  const q = 'DELETE FROM grupo WHERE `grupoId` = ?'
+  db.query(q, [req.body.grupoId], (err, response) => {
+    if (err){
+      return res.status(200).json(err)
+    }
+    else {
+      const block = {
+        id: 1,
+        message: 'grupo deletado com sucesso'
+      }
+      return res.status(200).json(block)
+    }
+  })
+
+}
 export const addUser = (req, res) => {
   // console.log(req.data);
   const peido = req.body.peido
