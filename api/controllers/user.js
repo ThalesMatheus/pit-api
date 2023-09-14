@@ -299,12 +299,38 @@ export const  group_entry = (req, res) => {
           return res.status(304).json(err)
         }
         else {
-          return res.status(200).json({id: 1, message: 'Entrou no grupo'})
+          return res.status(200).json({id: 2, message: 'Entrou no grupo'})
         }
       })
     }
     else{
-      return res.status(304).json('Você já está participando deste grupo!')
+      return res.status(200).json({id:1,message:'Você já está participando deste grupo!'})
+    }
+  })
+}
+
+export const  group_leave = (req, res) => {
+  //const sexo = validaCookie(req, res);
+  console.log(req.body)
+  const check = 'SELECT * FROM grupo_has_usuario WHERE `uuid` = ?'
+  const a = JSON.parse(atob(req.body.uuid.split('.')[1])).id;
+
+  db.query(check, [a], (err, response) => {
+    if (err) console.log(err)
+    if (response.length !== 0) {
+      const q = 'delete from grupo_has_usuario where `grupoId` = ? && `uuid` =?'
+      db.query(q, [req.body.groupid, a], (err, response) => {
+        if (err) {
+          console.log(err)
+          return res.status(304).json(err)
+        }
+        else {
+          return res.status(200).json({id: 2, message: 'Saiu do grupo'})
+        }
+      })
+    }
+    else{
+      return res.status(200).json({di:1,message:'Você não está participando deste grupo!'})
     }
   })
 }
