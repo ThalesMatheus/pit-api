@@ -338,9 +338,11 @@ export const  group_leave = (req, res) => {
 }
 
 export const current_users = (req, res) => {
+  console.log('=========================================================================')
+  console.log(req.body.groupid)
 const query = 'SELECT * FROM grupo_has_usuario INNER JOIN user_data ON user_data.uuid_fk = grupo_has_usuario.uuid WHERE grupo_has_usuario.grupoId = ?';
 //SELECT user_data.nome FROM grupo_has_usuario INNER JOIN user_data ON user_data.uuid_fk = grupo_has_usuario.uuid WHERE grupo_has_usuario.grupoId = 'sexo';
-db.query(query, [req.body.groupid.groupid], (err, response) => {
+db.query(query, [req.body.groupid], (err, response) => {
   console.log(response)
   return res.status(200).json(response);
 })
