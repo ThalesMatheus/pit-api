@@ -102,6 +102,9 @@ export const deleteGroup = (req, res) => {
 
 }
 export const addUser = (req, res) => {
+  try {
+   
+  
   // console.log(req.data);
   const peido = req.body.peido
   const id = uuidv4()
@@ -138,6 +141,10 @@ export const addUser = (req, res) => {
       })
     }
   })
+}
+catch(error) {
+  console.log(error)
+}
 }
 
 export const auth_check = (req, res) => {
@@ -277,14 +284,18 @@ export const forgotPass = (req, res) => {
     .catch(err => console.log("Erro ao enviar email: ", err));
 }
 export const  group_entry = (req, res) => {
-  const sexo = validaCookie(req, res);
-  console.log(sexo);
+  //const sexo = validaCookie(req, res);
+  console.log(req.body)
   const check = 'SELECT * FROM grupo_has_usuario WHERE `uuid` = ?'
-  db.query(check, [req.body.uuid], (err, response) => {
+  const a = JSON.parse(atob(req.body.uuid.split('.')[1])).id;
+
+  db.query(check, [a], (err, response) => {
+    if (err) console.log(err)
     if (response.length === 0) {
       const q = 'INSERT INTO grupo_has_usuario(`grupoId`, `uuid`) VALUES(?, ?)'
-      db.query(q, [req.body.grupoId, req.body.token], (err, response) => {
+      db.query(q, [req.body.groupid, a], (err, response) => {
         if (err) {
+          console.log(err)
           return res.status(304).json(err)
         }
         else {
@@ -296,4 +307,12 @@ export const  group_entry = (req, res) => {
       return res.status(304).json('Você já está participando deste grupo!')
     }
   })
+}
+
+export const current_users = (req, res) => {
+const query = 'SELECT grupo_has_usuario.uuid FROM grupo_has_usuario WHERE grupo_has_usuario.grupoId = ?';
+db.query(query, [req.body.groupid.groupid], (err, response) => {
+  console.log(response)
+  return res.status(200).json(response);
+})
 }

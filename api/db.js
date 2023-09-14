@@ -1,7 +1,7 @@
-import mysql from 'mysql'
+import mysql from 'mysql2'
 
 export const db = mysql.createConnection({
-  host: '192.168.51.172',
+  host: '127.0.0.1',
   user: 'root',
   password: 'my-secret-pw',
   database: 'HobbyIt'
