@@ -27,6 +27,7 @@ function trigger (idtext, messagetext) {
   res.status(200).json(response)
 }
 export const createGroup = (req, res) => {
+  console.log(req)
   const keysWithNullValues = Object.keys(req.body).filter(key => req.body[key] === '');
   const keysString = keysWithNullValues.join(', ');
   console.log(keysWithNullValues)
@@ -222,6 +223,7 @@ export const deleteUser = (req, res) => {
   })
 }
 export const updateImage = (req, res) => {
+  console.log(req)
   if (req.files) {
     console.log(req.body.uuid)
     const file = req.files.photo
@@ -236,7 +238,7 @@ export const updateImage = (req, res) => {
           .json('falha ao fazer upload! Tente novamente mais tarde')
       } else {
         res.status(200).json('Perfil atualizado')
-        const q = 'UPDATE user_data SET pfp = ? WHERE uuid_fk = ?'
+        const q = 'UPDATE user_data SET foto = ? WHERE uuid_fk = ?'
         db.query(q, [filename, req.body.uuid], (err) => {
           if (err) {
             console.log(err)
@@ -299,18 +301,19 @@ export const  group_entry = (req, res) => {
           return res.status(304).json(err)
         }
         else {
-          return res.status(200).json({id: 1, message: 'Entrou no grupo'})
+          return res.status(200).json({id: 2, message: 'Entrou no grupo'})
         }
       })
     }
     else{
-      return res.status(304).json('Você já está participando deste grupo!')
+      return res.status(200).json({id: 1, message: 'Você já está participando deste grupo!'})
     }
   })
 }
 
 export const current_users = (req, res) => {
-const query = 'SELECT grupo_has_usuario.uuid FROM grupo_has_usuario WHERE grupo_has_usuario.grupoId = ?';
+const query = 'SELECT * FROM grupo_has_usuario INNER JOIN user_data ON user_data.uuid_fk = grupo_has_usuario.uuid WHERE grupo_has_usuario.grupoId = ?';
+//SELECT user_data.nome FROM grupo_has_usuario INNER JOIN user_data ON user_data.uuid_fk = grupo_has_usuario.uuid WHERE grupo_has_usuario.grupoId = 'sexo';
 db.query(query, [req.body.groupid.groupid], (err, response) => {
   console.log(response)
   return res.status(200).json(response);
