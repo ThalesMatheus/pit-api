@@ -1,4 +1,4 @@
-import { URL as URL$1, fileURLToPath, pathToFileURL } from 'url';
+reimport { URL as URL$1, fileURLToPath, pathToFileURL } from 'url';
 import fs from 'fs';
 import path from 'path';
 import moduleExports, { Module } from 'module';

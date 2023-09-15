@@ -126,13 +126,15 @@ export const addUser = (req, res) => {
           if (err) {
           } else {
             const x =
-              'INSERT INTO user_data(`nome`, `sobrenome`,`cep`, `telefone`, `apelido`, `uuid_fk`) VALUES(?,?,?,?,?,?)'
+              'INSERT INTO user_data(`nome`, `sobrenome`,`cep`, `telefone`, `apelido`, `genero`,`foto`,`uuid_fk`) VALUES(?,?,?,?,?,?,?,?)'
             db.query(x, [
               req.body.nome,
               req.body.sobrenome,
               req.body.endereco,
               req.body.telefone,
               req.body.nick,
+              'a',
+              'a',
               id
             ])
             const response = { id: 2, message: 'Usuario criado com sucesso' }
@@ -339,7 +341,7 @@ export const  group_leave = (req, res) => {
 
 export const current_users = (req, res) => {
   console.log('=========================================================================')
-  console.log(req.body.groupid)
+  console.log(req.body)
 const query = 'SELECT * FROM grupo_has_usuario INNER JOIN user_data ON user_data.uuid_fk = grupo_has_usuario.uuid WHERE grupo_has_usuario.grupoId = ?';
 //SELECT user_data.nome FROM grupo_has_usuario INNER JOIN user_data ON user_data.uuid_fk = grupo_has_usuario.uuid WHERE grupo_has_usuario.grupoId = 'sexo';
 db.query(query, [req.body.groupid], (err, response) => {
