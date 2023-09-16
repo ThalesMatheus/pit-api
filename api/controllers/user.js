@@ -26,11 +26,14 @@ function trigger (idtext, messagetext) {
   const response = { id: idtext, message: `${messagetext}` }
   res.status(200).json(response)
 }
+// deepcode ignore NoRateLimitingForExpensiveWebOperation: <please specify a reason of ignoring this>
 export const createGroup = (req, res) => {
-  console.log(req)
+  console.log(req.body.grouplink)
   const keysWithNullValues = Object.keys(req.body).filter(key => req.body[key] === '');
   const keysString = keysWithNullValues.join(', ');
   console.log(keysWithNullValues)
+  const a = JSON.parse(atob(req.body.uuid_fake.split('.')[1])).id;
+  console.log(a)
 if (keysWithNullValues.length > 0) {
   console.log('im here')
   const response = { id: 2, message: `há campos em branco. Preencha-os e tente novamente: ${keysString} ` };
@@ -52,7 +55,7 @@ if (keysWithNullValues.length > 0) {
     } else {
       if (result.length !== 0) {
         const response = { id: 2, message: 'A group with this ID already exists!' };
-        res.status(200).json(response);
+        res.status(302).json(response);
       } else {
         const crud = 'INSERT INTO grupo(`grupoId`,`nome`,`foto`,`descricao`, `cnpj`,`cep`,`categorias`,`visibilidade`) VALUES(?,?,?,?,?,?,?,?)';
         var privado_ = req.body.c77 == "on" ? 1 : 0;
@@ -61,15 +64,30 @@ if (keysWithNullValues.length > 0) {
             console.error('Error creating group:', error);
             res.status(500).json({ error: 'Error creating group' });
           } else {
-            const createdGroup = {
-              id: result.insertId,
-              name: req.body.nome,
-              // Add more properties as needed
-            };
-            res.status(201).json(createdGroup);
-          }
+            // const createdGroup = {
+            //   id: result.insertId,
+            //   name: req.body.nome,
+            //   // Add more properties as needed
+            // };
+            const q = 'INSERT INTO grupo_has_usuario(`grupoId`, `uuid`, `role`) VALUES(?, ?, ?)'
+            db.query(q, [req.body.grouplink, a, 'admin'], (err, response) => {
+            if (err){
+              return res.status(200).json(err)
+            }
+            else {
+              const block = {
+                id: 1,
+                message: 'grupo criado com sucesso'
+              }
+              return res.status(200).json(block)
+            }
+            
+          })
+        }
         });
+        
       }
+      
     }
   });
 }}
@@ -81,7 +99,10 @@ export const getAllGroups = (req, res) => {
       res.status(500).json({ error: 'Error fetching groups' });
     } else {
       console.log(results)
-      res.status(200).json(results);
+      setTimeout(() => {
+        res.status(200).json(results);
+        
+      }, 5000);
     }
   });
 };
@@ -296,8 +317,8 @@ export const  group_entry = (req, res) => {
   db.query(check, [a], (err, response) => {
     if (err) console.log(err)
     if (response.length === 0) {
-      const q = 'INSERT INTO grupo_has_usuario(`grupoId`, `uuid`) VALUES(?, ?)'
-      db.query(q, [req.body.groupid, a], (err, response) => {
+      const q = 'INSERT INTO grupo_has_usuario(`grupoId`, `uuid`, `role`) VALUES(?, ?, ?)'
+      db.query(q, [req.body.groupid, a, 'user'], (err, response) => {
         if (err) {
           console.log(err)
           return res.status(304).json(err)
