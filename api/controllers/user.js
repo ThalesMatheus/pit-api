@@ -28,12 +28,11 @@ function trigger (idtext, messagetext) {
 }
 // deepcode ignore NoRateLimitingForExpensiveWebOperation: <please specify a reason of ignoring this>
 export const createGroup = (req, res) => {
-  console.log(req.body.grouplink)
+  console.log(req.body)
   const keysWithNullValues = Object.keys(req.body).filter(key => req.body[key] === '');
   const keysString = keysWithNullValues.join(', ');
   console.log(keysWithNullValues)
   const a = JSON.parse(atob(req.body.uuid_fake.split('.')[1])).id;
-  console.log(a)
 if (keysWithNullValues.length > 0) {
   console.log('im here')
   const response = { id: 2, message: `há campos em branco. Preencha-os e tente novamente: ${keysString} ` };
@@ -41,7 +40,9 @@ if (keysWithNullValues.length > 0) {
 } else {
   if (req.files) {
     const file = req.files.photo
+    console.log("TEM IMAGEM")
     const fileExtension = file.name.split('.').pop()
+    const filename = `${Math.floor(Math.random() * 1000) + 1}.${fileExtension}`
     const uploadPath = './uploads/' + filename // Specify the path to save the file
 
     file.mv(uploadPath)
@@ -107,7 +108,7 @@ export const getAllGroups = (req, res) => {
   });
 };
 export const deleteGroup = (req, res) => {
-  console.log(req.body)
+  console.log(req.body.grupoId)
   const q = 'DELETE FROM grupo WHERE `grupoId` = ?'
   db.query(q, [req.body.grupoId], (err, response) => {
     if (err){
@@ -321,7 +322,7 @@ export const  group_entry = (req, res) => {
       db.query(q, [req.body.groupid, a, 'user'], (err, response) => {
         if (err) {
           console.log(err)
-          return res.status(304).json(err)
+          return res.status(200).json(err)
         }
         else {
           return res.status(200).json({id: 2, message: 'Entrou no grupo'})
@@ -347,7 +348,7 @@ export const  group_leave = (req, res) => {
       db.query(q, [req.body.groupid, a], (err, response) => {
         if (err) {
           console.log(err)
-          return res.status(304).json(err)
+          return res.status(200).json(err)
         }
         else {
           return res.status(200).json({id: 2, message: 'Saiu do grupo'})
