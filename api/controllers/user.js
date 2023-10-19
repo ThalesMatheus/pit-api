@@ -371,3 +371,11 @@ db.query(query, [req.body.groupid], (err, response) => {
   return res.status(200).json(response);
 })
 }
+export const user_content = (req, res) => {
+
+  const query = 'SELECT * FROM user_data WHERE uuid_fk = ?';
+  db.query(query, [req.body.uuid], (err, response) => {
+    console.log(response)
+    return res.status(200).json(response);
+  })
+}
