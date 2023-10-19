@@ -8,7 +8,6 @@ const app = express()
 app.use(fileUpload())
 app.use(express.json())
 app.use(cors())
-
 app.use('/', userRoutes)
-
+app.use('/uploads', express.static('uploads'));
 app.listen(8800)

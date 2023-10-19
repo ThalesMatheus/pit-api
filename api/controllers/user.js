@@ -38,11 +38,11 @@ if (keysWithNullValues.length > 0) {
   const response = { id: 2, message: `há campos em branco. Preencha-os e tente novamente: ${keysString} ` };
   res.status(200).json(response);
 } else {
+  var filename = ''
   if (req.files) {
     const file = req.files.photo
-    console.log("TEM IMAGEM")
     const fileExtension = file.name.split('.').pop()
-    const filename = `${Math.floor(Math.random() * 1000) + 1}.${fileExtension}`
+    filename = `${Math.floor(Math.random() * 1000) + 1}.${fileExtension}`
     const uploadPath = './uploads/' + filename // Specify the path to save the file
 
     file.mv(uploadPath)
@@ -60,7 +60,7 @@ if (keysWithNullValues.length > 0) {
       } else {
         const crud = 'INSERT INTO grupo(`grupoId`,`nome`,`foto`,`descricao`, `cnpj`,`cep`,`categorias`,`visibilidade`) VALUES(?,?,?,?,?,?,?,?)';
         var privado_ = req.body.c77 == "on" ? 1 : 0;
-        db.query(crud, [req.body.grouplink ? req.body.grouplink : uuidv4, req.body.nome, req.body.image ? 'teste.png' : 'none', req.body.description, req.body.cnpj, req.body.endereco, 'esporte', privado_], (error, result) => {
+        db.query(crud, [req.body.grouplink ? req.body.grouplink : uuidv4, req.body.nome, filename, req.body.description, req.body.cnpj, req.body.endereco, 'esporte', privado_], (error, result) => {
           if (error) {
             console.error('Error creating group:', error);
             res.status(500).json({ error: 'Error creating group' });
